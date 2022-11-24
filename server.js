@@ -1,16 +1,14 @@
-/*************************************************************************
-* WEB322– Assignment 4
-* I declare that this assignment is my own work in accordance with Seneca Academic
-Policy. No part of this assignment has been copied manually or electronically from any
-other source.
+/*********************************************************************************
+* WEB322 – Assignment 5
+* I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
+* of this assignment has been copied manually or electronically from any other source
 * (including 3rd party web sites) or distributed to other students.
 *
-* Name: Hugh Kim Student ID: 141050211 Date: 2022/11/10
+* Name: Hugh Kim Student ID: 141050211 Date: 2022-11-23
 *
-* Your app’s URL (from Cyclic Heroku) that I can click to see your application:
-* ______________________________________________
+* Online Cyclic Link: 
 *
-*************************************************************************/ 
+********************************************************************************/
 
 const express = require("express");
 const fs = require("fs");
@@ -33,6 +31,13 @@ const HTTP_PORT = process.env.PORT || 8080;
 
 function onHttpStart() {
     console.log("Express http server listening on: " + HTTP_PORT);
+    return new Promise((res, req) => {
+        dataService.initialize().then((data) => {
+            console.log(data)
+        }).catch((err) => {
+            console.log(err);
+        });
+    });
 }
 
 app.engine('.hbs', exphbs.engine({ 
@@ -74,49 +79,132 @@ app.get("/about", (req, res) => {
 app.get("/employees", function (req, res) {
     if(req.query.status){
         dataService.getEmployeesByStatus(req.query)
-        .then((data) => {res.render("employees", {employees: data}) ;}).catch((err) => {
-            console.log(err);res.render({message: "no results"});
+        .then((data) => {
+            if(data.length > 0) {
+                res.render("employees", {employees: data});
+            }
+            else {
+                res.render("employees",{message: "no results"});
+            }
+            }).catch((err) => {
+            console.log(err);
         });
     }
     else if(req.query.department){
         dataService.getEmployeesByDepartment(req.query)
-        .then((data) => {res.render("employees", {employees: data}) ;}).catch((err) => {
-            console.log(err);res.render({message: "no results"});
+        .then((data) => {
+            if(data.length > 0) {
+                res.render("employees", {employees: data});
+            }
+            else {
+                res.render("employees",{message: "no results"});
+            }
+            }).catch((err) => {
+            console.log(err);
         });
     }
     else if(req.query.manager){
         dataService.getEmployeesByManager(req.query)
-        .then((data) => {res.render("employees", {employees: data}) ;}).catch((err) => {
-            console.log(err);res.render({message: "no results"});
+        .then((data) => {
+            if(data.length > 0) {
+                res.render("employees", {employees: data});
+            }
+            else {
+                res.render("employees",{message: "no results"});
+            }
+            }).catch((err) => {
+            console.log(err);
         });
     }
     else {
         dataService.getAllEmployees(req.query)
-        .then((data) => {res.render("employees", {employees: data});}).catch((err) => {
-            console.log(err);res.render({message: "no results"});
+        .then((data) => {
+            if(data.length > 0) {
+                res.render("employees", {employees: data});
+            }
+            else {
+                res.render("employees",{message: "no results"});
+            }
+            }).catch((err) => {
+            console.log(err);
         });
     }
 });
 
-app.get("/employee/:employeeNum", function (req, res) {
-    dataService.getEmployeeByNum(req.params)
-    .then((data) => {res.render("employee",{employee: data});}).catch((err) => {
-        console.log(err); res.render({message:"no results"});
-    })
+app.get("/employee/:employeeNum", (req, res) => {
+    // initialize an empty object to store the values
+    let viewData = {};
+    dataService.getEmployeeByNum(req.params.empNum).then((data) => {
+        viewData.data = data; //store employee data in the "viewData" object as "data"
+    }).catch(() => {
+        viewData.data = null; // set employee to null if there was an error
+    }).then(dataService.getDepartments).then((data) => {
+        viewData.departments = data; // store department data in the "viewData" object as "departments"
+                                     // loop through viewData.departments and once we have found the departmentId that matches
+                                     // the employee's "department" value, add a "selected" property to the matching
+                                     // viewData.departments object
+        for (let i = 0; i < viewData.departments.length; i++) {
+            if (viewData.departments[i].departmentId == viewData.data[0].department) {
+                viewData.departments[i].selected = true;
+            }
+        }
+        // if not add department set Selected to false and promto a message to user, message like "Please Choose Department" in html.
+        if (viewData.departments[viewData.departments.length-1].departmentId != viewData.data[0].department) {
+            viewData.departments.Selected = false;
+        }
+    }).catch(() => {
+        viewData.departments = []; // set departments to empty if there was an error
+    }).then(() => {
+        if (viewData.data == null){ // if no employee - return an error
+            res.status(404).send("Employee Not Found!!!");
+        } else {
+            res.render("employee", { viewData: viewData }); // render the "employee" view
+        }
+    });
 });
 
 app.get("/departments", function(req,res){
     dataService.getDepartments()
-    .then((data) => { res.render("departments",{departments: data});}).catch((err) => {
-        console.log(err);res.render({message: "no results"});
+    .then((data) => { 
+        
+        if(data.length>0){
+            res.render("departments",{departments: data});}
+        else{
+            res.render("departments",{message: "no results"});
+        }
+    }).catch((err) => {
+        console.log(err);
     })
 });
 
-
+app.get("/department/:departmentId", (req, res) => {
+    dataService.getDepartmentById(req.params.departmentId).then((data) => {
+        res.render("department", {
+           data: data
+        });
+    }).catch((err) => {
+        res.status(404).send("Department Not Found");
+    });
+});
 
 app.get("/employees/add", (req, res) => {
-    res.render('addEmployee');
-    
+    dataService.getDepartments().then((data) => {
+        res.render("addEmployee",{departments: data});
+    }).catch((err) => {
+        res.render("addEmployee", {departments: []});
+    });
+});
+
+app.get("/departments/add", (req, res) => {
+    res.render("addDepartment");
+});
+
+app.get("/employee/delete/:empNum", (req, res) => {
+    dataService.deleteEmployeeByNum(req.params.empNum).then((data) => {
+        res.redirect("/employees");
+    }).catch((err) => {
+        res.status(500).send("Unable to Remove Employee / Employee not found");
+    });
 });
 
 app.use(express.json());
@@ -126,6 +214,12 @@ app.use(express.urlencoded({extended: true}));
 app.post("/employees/add", function(req,res){
     dataService.addEmployee(req.body).then(() => {
         res.redirect("/employees");
+    });
+});
+
+app.post("/departments/add", function(req,res){
+    dataService.addDepartment(req.body).then(() => {
+        res.redirect("/departments");
     });
 });
 
@@ -158,14 +252,11 @@ app.post("/employee/update", (req, res) => {
     });
    });
 
+
+
 app.use(express.static('public'));
 app.use(function (req, res) {
     res.status(404).sendFile(path.join(__dirname,"/views/error404.html"));});
 
 
-dataService.initialize()
-    .then(() => {
-        app.listen(8080, onHttpStart);
-    }).catch((err) => {
-        console.log(err);
-    });
+app.listen(HTTP_PORT, onHttpStart);

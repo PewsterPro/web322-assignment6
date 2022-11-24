@@ -15,7 +15,7 @@ td {
 
 
 </style>
- <h2>Employees</h2>
+ <h2>Employees <a href="/employees/add" class="btn btn-success pull-right">Add New Employee</a></h2>
  <hr />
  <p>
     <table>
@@ -26,7 +26,7 @@ td {
             <th>Address</th>
             <th>Manager ID</th>
             <th>Status</th>
-            <th>Dpartment</th>
+            <th>Department</th>
             <th>Hire On</th>
         </tr>
         {{#each employees}}
@@ -39,6 +39,7 @@ td {
             <td><a href="http://localhost:8080/employees?status={{status}}">{{status}}</a></td>
             <td><a href="http://localhost:8080/employees?department={{department}}">{{department}}</a></td>
             <td>{{hireDate}}</td>
+            <td><a href="/employee/delete/{{employeeNum}}" class="btn btn-success pull-right">Remove</a></td>
         </tr>
         {{else}}
     <div class="col-md-12 text-center">
