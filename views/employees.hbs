@@ -1,0 +1,53 @@
+<div class="row">
+ <div class="col-md-12">
+ <style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td {
+  border-top: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+
+</style>
+ <h2>Employees</h2>
+ <hr />
+ <p>
+    <table>
+        <tr>
+            <th>Employees Num</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Manager ID</th>
+            <th>Status</th>
+            <th>Dpartment</th>
+            <th>Hire On</th>
+        </tr>
+        {{#each employees}}
+        <tr>
+            <td>{{employeeNum}}</td>
+            <td><a href="http://localhost:8080/employee/{{employeeNum}}">{{firstName}} {{lastName}}</a></td>
+            <td><a href="mailto:{{email}}">{{email}}</a></td>
+            <td>{{addressStreet}}, {{addressCity}}, {{addressState}}, {{addressPostal}}</td>
+            <td><a href="http://localhost:8080/employees?manager={{employeeManagerNum}}">{{employeeManagerNum}}</a></td>
+            <td><a href="http://localhost:8080/employees?status={{status}}">{{status}}</a></td>
+            <td><a href="http://localhost:8080/employees?department={{department}}">{{department}}</a></td>
+            <td>{{hireDate}}</td>
+        </tr>
+        {{else}}
+    <div class="col-md-12 text-center">
+      <strong>{{message}}</strong>
+    </div>
+        {{/each}}
+    </table>
+    
+    
+ </p>
+ </div>
+</div>
