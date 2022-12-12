@@ -11,10 +11,6 @@ var sequelize = new Sequelize('kphbsunq', 'kphbsunq', '70ps8VLEHGpHvUnSZxu_GmRo3
    query:{raw: true} // update here, you. Need this
    }); 
 
-   sequelize.authenticate().then(()=> console.log('Connection success.'))
-   .catch((err)=>console.log("Unable to connect to DB.", err));
-
-
    var Employee = sequelize.define('Employee', {
     employeeNum: {
         type: Sequelize.INTEGER,
